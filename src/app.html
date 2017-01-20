@@ -1,0 +1,71 @@
+<template>
+    <div style="padding: 15px;">
+        <require from="./relation-row"></require>
+        <require from="./display-chart"></require>
+        <table class="table table-bordered table-hover table-striped">
+            <thead>
+            <tr>
+                <th>
+                    Underlying Pair
+                </th>
+                <th>
+                    Related Pair
+                </th>
+                <th>
+                    Fit Type
+                </th>
+                <th>
+                    # Months
+                </th>
+                <th>
+                    Equation
+                </th>
+                <th>
+                    R<sup>2</sup>
+                </th>
+                <th>
+                    Actual/Predicted
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr repeat.for="config of relationConfigs" as-element="compose" view-model="./relation-row" model.bind="config" view-chart.trigger="$parent.viewChart($event)">
+            <tr>
+                <td>
+                    <select value.bind="newConfig.underlyingCurrencyPair">
+                        <option selected="selected" value="">-- Select --</option>
+                        <option repeat.for="currencyPair of currencyPairs" value.bind="currencyPair">${currencyPair}</option>
+                    </select>
+                </td>
+                <td>
+                    <select value.bind="newConfig.relatedCurrencyPair">
+                        <option selected="selected" value="">-- Select --</option>
+                        <option repeat.for="currencyPair of currencyPairs" value.bind="currencyPair">${currencyPair}</option>
+                    </select>
+                </td>
+                <td>
+                    <select value.bind="newConfig.fitType">
+                        <option selected="selected" value="">-- Select --</option>
+                        <option repeat.for="fitType of fitTypes" value.bind="fitType">${fitType}<option>
+                    </select>
+                </td>
+                <td>
+                    <input type="number" value.bind="newConfig.numMonths">
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                    <button type="button" class="btn btn-success" click.trigger="addConfig()">Add</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div show.bind="errorMessage" class="alert alert-danger">
+            ${errorMessage}
+        </div>
+        <div style="width: 50%; margin: 15px auto;">
+            <display-chart config.bind="chartConfig"></display-chart>
+        </div>
+    </div>
+</template>
