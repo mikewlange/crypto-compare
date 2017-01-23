@@ -30,7 +30,8 @@
             </tr>
             </thead>
             <tbody>
-            <tr repeat.for="config of relationConfigs" as-element="compose" view-model="./relation-row" model.bind="config" view-chart.trigger="$parent.viewChart($event)">
+            <tr repeat.for="config of relationConfigs" as-element="compose" view-model="./relation-row" model.bind="config"
+                view-chart.trigger="$parent.viewChart($event)" remove.trigger="relationConfigs.splice($index, 1)">
             <tr>
                 <td>
                     <select value.bind="newConfig.underlyingCurrencyPair">

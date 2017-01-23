@@ -102,4 +102,11 @@ export class RelationRowCustomElement {
 
         this.element.dispatchEvent(event);
     }
+
+    remove() {
+        const event = new CustomEvent('remove');
+
+        this.element.dispatchEvent(event);
+    }
+
 }
