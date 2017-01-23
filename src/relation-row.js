@@ -78,4 +78,28 @@ export class RelationRowCustomElement {
 
         this.element.dispatchEvent(event);
     }
+
+    viewRelationship() {
+        const sortedUnderlying = this.regression.points.slice(0).sort((a, b) => {
+            return a[0] < b[0] ? -1 : b[0] < a[0] ? 1 : 0;
+        });
+
+        const event = new CustomEvent('view-chart', {
+            detail: {
+                type: 'line',
+                data: {
+                    labels: sortedUnderlying.map(p => p[0]),
+                    datasets: [
+                        {
+                            label: 'Predicted',
+                            data: sortedUnderlying.map(p => p[1]),
+                            backgroundColor: "rgba(124,166,224,0.4)"
+                        }
+                    ]
+                }
+            }
+        });
+
+        this.element.dispatchEvent(event);
+    }
 }

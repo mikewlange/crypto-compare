@@ -6,20 +6,20 @@ export class App {
 
     errorMessage = '';
 
-    fitTypes = [
-        'linear',
-        'exponential',
-        'logarithmic',
-        'power',
-        'polynomial'
-    ];
-
     relationConfigs = [];
 
     newConfig = {};
 
     constructor(httpClient) {
         this.httpClient = httpClient;
+
+        this.fitTypes = [
+            'linear',
+            'exponential',
+            'logarithmic',
+            'power',
+            'polynomial'
+        ];
     }
 
     activate() {
