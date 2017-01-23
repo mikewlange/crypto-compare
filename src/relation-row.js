@@ -18,26 +18,42 @@ export class RelationRowCustomElement {
     recalculate() {
         this.calculating = true;
         return Promise.all([
-                this.getChartData(this.config.underlyingCurrencyPair, this.config.numMonths).then(values => values.map(d => d.weightedAverage)),
-                this.getChartData(this.config.relatedCurrencyPair, this.config.numMonths).then(values => values.map(d => d.weightedAverage))
+                this.getChartData(this.config.underlyingCurrencyPair, this.config.numMonths),
+                this.getChartData(this.config.relatedCurrencyPair, this.config.numMonths)
             ])
             .then(values => {
-                this.underlyingData = values[0];
-                this.relatedData = values[1];
-                this.regression = this.calculateRegression(this.underlyingData, this.relatedData);
-                const slope = this.regression.equation[0];
-                const yIntercept = this.regression.equation[1];
-                this.predictedValue = this.regression.points[this.regression.points.length - 1][1];
-                this.actualValue = this.relatedData[this.relatedData.length - 1];
-                this.calculating = false;
+                this.underlyingData = values[0].map(d => d.weightedAverage);
+                this.relatedData = values[1].map(d => d.weightedAverage);
+
+                this.calculateTimeAdjustment(values[0], values[1]);
+                this.calculateDependency();
             });
     }
 
-    calculateRegression(underlyingData, relatedData) {
+    calculateDependency() {
+        const r = this.relatedData.map((d, index) => d - this.timeAdjRegression.points[index][1]);
+        this.regression = this.calculateRegression(this.underlyingData, r, this.config.fitType);
+        const slope = this.regression.equation[0];
+        const yIntercept = this.regression.equation[1];
+        this.predictedValue = this.regression.points[this.regression.points.length - 1][1];
+        this.actualValue = this.relatedData[this.relatedData.length - 1];
+        this.calculating = false;
+    }
+
+    calculateTimeAdjustment(underlyingData, relatedData) {
+        const u = underlyingData.map(d => d.date);
+        const r = relatedData.map((d, index) => {
+            const timeAdjsted = (underlyingData[index].weightedAverage / underlyingData[0].weightedAverage) * relatedData[0].weightedAverage;
+            return d.weightedAverage - timeAdjsted;
+        });
+        this.timeAdjRegression = this.calculateRegression(u, r, 'linear');
+    }
+
+    calculateRegression(underlyingData, relatedData, fitType) {
         const regressionData = underlyingData.map((dataPoint, index) => {
             return [dataPoint, relatedData[index]];
         });
-        return regression(this.config.fitType, regressionData);
+        return regression(fitType, regressionData);
     }
 
     getChartData(currencyPair, months) {
@@ -64,12 +80,17 @@ export class RelationRowCustomElement {
                         {
                             label: 'Actual',
                             data: this.relatedData,
-                            backgroundColor: "rgba(227,103,103,0.4)"
+                            backgroundColor: "rgba(227,103,103,0.1)"
+                        },
+                        {
+                            label: 'Time Adjust',
+                            data: this.timeAdjRegression.points.map(p => p[1]),
+                            backgroundColor: "rgba(0,0,0,0.1)"
                         },
                         {
                             label: 'Predicted',
                             data: this.regression.points.map(p => p[1]),
-                            backgroundColor: "rgba(124,166,224,0.4)"
+                            backgroundColor: "rgba(124,166,224,0.1)"
                         }
                     ]
                 }
